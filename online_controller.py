@@ -26,10 +26,10 @@ class IntersectionController:
     
     def __init__(self, tls_id, incoming_lanes):
         self.tls_id = tls_id
-        self.incoming_lanes = incoming_lanes  # {direction: [lane_ids]}
+        self.incoming_lanes = incoming_lanes  
         self.current_phase = 0
         self.phase_timer = 0
-        self.phase_durations = [42, 3, 42, 3]  # NS green, yellow, EW green, yellow
+        self.phase_durations = [42, 3, 42, 3]  
         self.stats = {
             'total_waiting': 0,
             'phase_switches': 0,
@@ -41,15 +41,14 @@ class IntersectionController:
     def initialize(self):
         """Initialize and validate traffic light"""
         try:
-            # Check if traffic light exists
+    
             all_tls = traci.trafficlight.getIDList()
             if self.tls_id not in all_tls:
                 print(f"⚠️  Traffic light {self.tls_id} not found in simulation")
                 return False
             
             self.tls_exists = True
-            
-            # Validate lanes
+          
             all_lanes = set(traci.lane.getIDList())
             for direction, lanes in self.incoming_lanes.items():
                 valid = [l for l in lanes if l in all_lanes]
@@ -58,7 +57,6 @@ class IntersectionController:
                 else:
                     print(f"⚠️  No valid lanes for {self.tls_id} direction {direction}")
             
-            # Get valid phase count
             try:
                 program = traci.trafficlight.getAllProgramLogics(self.tls_id)[0]
                 num_phases = len(program.phases)
@@ -108,7 +106,7 @@ class IntersectionController:
             return max(10, min(60, optimal_time))
         except Exception as e:
             print(f"⚠️  Prediction error: {e}")
-            return 30  # Default fallback
+            return 30  
     
     def update(self, step):
         """Updates traffic light state"""
@@ -117,24 +115,21 @@ class IntersectionController:
             
         self.phase_timer += 1
         
-        # Check if phase needs switching
         if self.phase_timer >= self.phase_durations[self.current_phase]:
-            # Predict time before green phase
-            if self.current_phase == 1:  # Transition from yellow NS to green EW
+            if self.current_phase == 1:  
                 features = self.get_direction_features('EW')
                 self.phase_durations[2] = self.predict_green_time(features)
                 
-            elif self.current_phase == 3:  # Transition from yellow EW to green NS
+            elif self.current_phase == 3:  
                 features = self.get_direction_features('NS')
                 self.phase_durations[0] = self.predict_green_time(features)
             
-            # Switch phase
             try:
                 self.current_phase = (self.current_phase + 1) % 4
                 traci.trafficlight.setPhase(self.tls_id, self.current_phase)
                 self.phase_timer = 0
                 self.stats['phase_switches'] += 1
-                return True  # Phase changed
+                return True  
             except Exception as e:
                 print(f"⚠️  Error switching phase for {self.tls_id}: {e}")
                 return False
@@ -177,8 +172,7 @@ class NetworkController:
         all_lanes = traci.lane.getIDList()
         print(f"   Found {len(all_lanes)} lanes in simulation")
         
-        # Define incoming lanes for each intersection
-        # Using simplified edge-based approach (without lane indices)
+
         intersection_configs = {
             'j_0_0': {
                 'NS': ['e_in_top_0', 'e_v_0_1_to_0_0'],
@@ -218,18 +212,15 @@ class NetworkController:
             }
         }
         
-        # Expand edge IDs to include all lanes
         expanded_configs = {}
         for tls_id, directions in intersection_configs.items():
             expanded_configs[tls_id] = {'NS': [], 'EW': []}
             
             for direction, edge_ids in directions.items():
                 for edge_id in edge_ids:
-                    # Find all lanes for this edge
                     matching_lanes = [l for l in all_lanes if l.startswith(edge_id + '_')]
                     expanded_configs[tls_id][direction].extend(matching_lanes)
         
-        # Create controllers for each intersection
         print("\n🚦 Setting up intersection controllers...")
         active_count = 0
         for tls_id, lanes_config in expanded_configs.items():
@@ -256,7 +247,7 @@ class NetworkController:
                 if changed:
                     phase_changes.append(tls_id)
             except Exception as e:
-                pass  # Silently continue if one intersection fails
+                pass  
         
         return phase_changes
     
@@ -267,7 +258,7 @@ class NetworkController:
         total_co2 = 0
         vehicle_count = 0
         
-        # Collect data from all lanes
+      
         for lane_id in traci.lane.getIDList():
             try:
                 total_waiting += traci.lane.getWaitingTime(lane_id)
@@ -321,7 +312,6 @@ def run_simulation(duration=3600):
     print("\n🚀 Starting SUMO...")
     traci.start([SUMO_BINARY, "-c", CONFIG_FILE, "--start", "--quit-on-end", "--no-warnings"])
     
-    # Initialize network controller
     network = NetworkController()
     
     if not network.setup_intersections():
@@ -333,23 +323,19 @@ def run_simulation(duration=3600):
     print("\n🔄 Starting adaptive control...\n")
     
     start_time = time.time()
-    report_interval = 300  # Report every 5 minutes
+    report_interval = 300  
     
     for step in range(duration):
         try:
             traci.simulationStep()
             
-            # Update all intersections
             phase_changes = network.update_all(step)
             
-            # Collect global statistics
             total_waiting, total_queue, total_co2, vehicle_count = network.collect_global_stats()
             
-            # Periodic report
             if step > 0 and step % report_interval == 0:
                 network.print_summary(step, total_waiting, total_queue, total_co2, vehicle_count)
             
-            # Brief progress every 10%
             elif step % (duration // 10) == 0 and step > 0:
                 progress = (step / duration) * 100
                 print(f"  {progress:5.1f}% | Vehicles: {vehicle_count:4d} | Wait: {total_waiting:8.1f}s | CO2: {total_co2:10.1f}g")
@@ -362,7 +348,6 @@ def run_simulation(duration=3600):
             print(f"\n⚠️  Error at step {step}: {e}")
             continue
     
-    # Final statistics
     elapsed = time.time() - start_time
     served_vehicles = traci.simulation.getArrivedNumber()
     
