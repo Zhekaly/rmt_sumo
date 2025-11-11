@@ -10,9 +10,6 @@ import time
 SUMO_BINARY = r"C:\Program Files (x86)\Eclipse\Sumo\bin\sumo.exe"
 CONFIG_FILE = r"C:\sumodemo\net\cross.sumocfg"
 
-# ============================================
-# FUNCTIONS FOR ADAPTIVE TRAFFIC LIGHT
-# ============================================
 
 def load_models():
     """Loads trained ML models"""
@@ -29,10 +26,8 @@ def load_models():
 
 def get_junction_lanes(junction_id):
     """Gets incoming lanes for the junction"""
-    # Get all edges leading to the junction
     incoming_edges = []
     
-    # Using information from net.xml
     junction_map = {
         'j_0_0': {
             'NS': ['e_in_top_0', 'e_v_0_1_to_0_0'],
@@ -80,7 +75,6 @@ def get_edge_features(edge_ids):
     
     for edge_id in edge_ids:
         try:
-            # Get all lanes of this edge
             lanes = traci.edge.getLaneNumber(edge_id)
             
             for lane_idx in range(lanes):
@@ -94,15 +88,12 @@ def get_edge_features(edge_ids):
                 for veh_id in traci.lane.getLastStepVehicleIDs(lane_id):
                     CO2 += traci.vehicle.getCO2Emission(veh_id)
                 
-                # Using more informative features
                 edge_data.append([veh_count, waiting_time, CO2, halting])
         except:
             pass
     
     if edge_data:
-        # Aggregate across all lanes in the direction
         features = np.mean(edge_data, axis=0)
-        # Return only first 3 features for model compatibility
         return features[:3].reshape(1, -1)
     
     return np.array([[0, 0, 0]])
@@ -119,27 +110,19 @@ def predict_green_time_adaptive(features, cat_model, nn_model, scaler, base_time
     cat_pred = cat_model.predict(features)[0]
     nn_pred = nn_model.predict(X_scaled, verbose=0)[0][0]
     
-    # Ensemble prediction
     ml_prediction = (cat_pred + nn_pred) / 2
     
-    # Adaptive correction based on load
     veh_count, waiting_time, co2 = features[0]
     
-    # If many vehicles - increase time
     if veh_count > 10 or waiting_time > 30:
         ml_prediction *= 1.3
     elif veh_count > 5 or waiting_time > 15:
         ml_prediction *= 1.15
     
-    # Combine with base time (70% ML, 30% base)
     optimal_time = 0.7 * ml_prediction + 0.3 * base_time
     
-    # Wider range
     return max(20, min(90, optimal_time))
 
-# ============================================
-# SIMULATION WITH FIXED TRAFFIC LIGHT
-# ============================================
 
 def run_fixed_traffic_light(duration=3600):
     """Runs simulation with fixed traffic light"""
@@ -165,7 +148,6 @@ def run_fixed_traffic_light(duration=3600):
     for step in range(duration):
         traci.simulationStep()
         
-        # Collect metrics every second
         total_waiting = 0
         total_queue = 0
         total_co2 = 0
@@ -187,12 +169,10 @@ def run_fixed_traffic_light(duration=3600):
         if vehicle_count > 0:
             metrics['avg_speed'].append(total_speed / vehicle_count)
         
-        # Progress every 10%
         if step % (duration // 10) == 0 and step > 0:
             progress = (step / duration) * 100
             print(f"   {progress:5.1f}% | Wait: {total_waiting:7.1f}s | Queue: {total_queue:3d} | CO2: {total_co2:8.1f}g")
     
-    # Count served vehicles
     metrics['served_vehicles'] = traci.simulation.getArrivedNumber()
     
     elapsed = time.time() - start_time
@@ -201,9 +181,6 @@ def run_fixed_traffic_light(duration=3600):
     traci.close()
     return metrics
 
-# ============================================
-# SIMULATION WITH ADAPTIVE TRAFFIC LIGHT
-# ============================================
 
 def run_adaptive_traffic_light(duration=3600):
     """Runs simulation with adaptive traffic light"""
@@ -214,7 +191,6 @@ def run_adaptive_traffic_light(duration=3600):
     print(f"⏱️  Duration: {duration} seconds ({duration//60} minutes)")
     print("-"*60)
     
-    # Load models
     cat_model, nn_model, scaler = load_models()
     if cat_model is None:
         print("❌ Cannot run adaptive traffic light without models!")
@@ -232,16 +208,14 @@ def run_adaptive_traffic_light(duration=3600):
         'green_times': []
     }
     
-    # Get list of traffic lights
     tls_list = traci.trafficlight.getIDList()
     
-    # State for each traffic light
     tls_states = {}
     for tls_id in tls_list:
         tls_states[tls_id] = {
             'current_phase': 0,
             'phase_timer': 0,
-            'phase_durations': [35, 3, 35, 3],  # Initial values
+            'phase_durations': [35, 3, 35, 3], 
             'lanes': get_junction_lanes(tls_id)
         }
     
@@ -250,16 +224,13 @@ def run_adaptive_traffic_light(duration=3600):
     for step in range(duration):
         traci.simulationStep()
         
-        # Update each traffic light
         for tls_id, state in tls_states.items():
             state['phase_timer'] += 1
             
-            # Check if phase needs to be switched
             if state['phase_timer'] >= state['phase_durations'][state['current_phase']]:
                 current_phase = state['current_phase']
                 
-                # Before green phase, predict time
-                if current_phase == 1:  # Transition from yellow NS to green EW
+                if current_phase == 1:  
                     edge_ids = state['lanes']['EW']
                     features = get_edge_features(edge_ids)
                     green_time = predict_green_time_adaptive(
@@ -268,7 +239,7 @@ def run_adaptive_traffic_light(duration=3600):
                     state['phase_durations'][2] = green_time
                     metrics['green_times'].append(('EW', green_time))
                     
-                elif current_phase == 3:  # Transition from yellow EW to green NS
+                elif current_phase == 3: 
                     edge_ids = state['lanes']['NS']
                     features = get_edge_features(edge_ids)
                     green_time = predict_green_time_adaptive(
@@ -277,7 +248,6 @@ def run_adaptive_traffic_light(duration=3600):
                     state['phase_durations'][0] = green_time
                     metrics['green_times'].append(('NS', green_time))
                 
-                # Switch phase
                 state['current_phase'] = (current_phase + 1) % 4
                 try:
                     traci.trafficlight.setPhase(tls_id, state['current_phase'])
@@ -286,7 +256,6 @@ def run_adaptive_traffic_light(duration=3600):
                 state['phase_timer'] = 0
                 metrics['phase_changes'].append((step, tls_id))
         
-        # Collect metrics
         total_waiting = 0
         total_queue = 0
         total_co2 = 0
@@ -308,7 +277,6 @@ def run_adaptive_traffic_light(duration=3600):
         if vehicle_count > 0:
             metrics['avg_speed'].append(total_speed / vehicle_count)
         
-        # Progress every 10%
         if step % (duration // 10) == 0 and step > 0:
             progress = (step / duration) * 100
             avg_green = np.mean([t for _, t in metrics['green_times'][-20:]]) if metrics['green_times'] else 35
@@ -325,10 +293,6 @@ def run_adaptive_traffic_light(duration=3600):
     traci.close()
     return metrics
 
-# ============================================
-# COMPARISON AND VISUALIZATION
-# ============================================
-
 def compare_metrics(fixed_metrics, adaptive_metrics):
     """Compares metrics of two traffic lights"""
     print("\n" + "="*70)
@@ -342,7 +306,6 @@ def compare_metrics(fixed_metrics, adaptive_metrics):
         'Improvement': []
     }
     
-    # Average waiting time
     fixed_wait = np.mean(fixed_metrics['waiting_times'])
     adaptive_wait = np.mean(adaptive_metrics['waiting_times'])
     improvement = ((fixed_wait - adaptive_wait) / fixed_wait) * 100
@@ -351,7 +314,6 @@ def compare_metrics(fixed_metrics, adaptive_metrics):
     stats['Adaptive'].append(f"{adaptive_wait:.1f}")
     stats['Improvement'].append(f"{improvement:+.1f}%")
     
-    # Maximum waiting time
     fixed_max = np.max(fixed_metrics['waiting_times'])
     adaptive_max = np.max(adaptive_metrics['waiting_times'])
     improvement = ((fixed_max - adaptive_max) / fixed_max) * 100
@@ -360,7 +322,6 @@ def compare_metrics(fixed_metrics, adaptive_metrics):
     stats['Adaptive'].append(f"{adaptive_max:.1f}")
     stats['Improvement'].append(f"{improvement:+.1f}%")
     
-    # Average queue length
     fixed_queue = np.mean(fixed_metrics['queue_lengths'])
     adaptive_queue = np.mean(adaptive_metrics['queue_lengths'])
     improvement = ((fixed_queue - adaptive_queue) / fixed_queue) * 100
@@ -369,7 +330,6 @@ def compare_metrics(fixed_metrics, adaptive_metrics):
     stats['Adaptive'].append(f"{adaptive_queue:.1f}")
     stats['Improvement'].append(f"{improvement:+.1f}%")
     
-    # Served vehicles
     if fixed_metrics['served_vehicles'] > 0:
         improvement = ((adaptive_metrics['served_vehicles'] - fixed_metrics['served_vehicles']) / fixed_metrics['served_vehicles']) * 100
         stats['Metric'].append('Vehicles Served')
@@ -377,7 +337,6 @@ def compare_metrics(fixed_metrics, adaptive_metrics):
         stats['Adaptive'].append(f"{adaptive_metrics['served_vehicles']}")
         stats['Improvement'].append(f"{improvement:+.1f}%")
     
-    # Average CO2
     fixed_co2 = np.mean(fixed_metrics['co2_emissions'])
     adaptive_co2 = np.mean(adaptive_metrics['co2_emissions'])
     if fixed_co2 > 0:
@@ -389,7 +348,6 @@ def compare_metrics(fixed_metrics, adaptive_metrics):
     stats['Adaptive'].append(f"{adaptive_co2:.1f}")
     stats['Improvement'].append(f"{improvement:+.1f}%")
     
-    # Average speed
     if fixed_metrics['avg_speed'] and len(fixed_metrics['avg_speed']) > 0:
         fixed_speed = np.mean(fixed_metrics['avg_speed']) * 3.6
         adaptive_speed = np.mean(adaptive_metrics['avg_speed']) * 3.6
@@ -399,12 +357,10 @@ def compare_metrics(fixed_metrics, adaptive_metrics):
         stats['Adaptive'].append(f"{adaptive_speed:.1f}")
         stats['Improvement'].append(f"{improvement:+.1f}%")
     
-    # Display table
     df = pd.DataFrame(stats)
     print("\n" + df.to_string(index=False))
     print("\n" + "="*70)
     
-    # Determine winner
     improvements = []
     if fixed_wait > 0:
         improvements.append(((fixed_wait - adaptive_wait) / fixed_wait) * 100)
@@ -433,7 +389,6 @@ def compare_metrics(fixed_metrics, adaptive_metrics):
     
     print("="*70)
     
-    # Save results
     df.to_csv('comparison_results.csv', index=False)
     print("\n💾 Results saved to: comparison_results.csv")
     
@@ -448,7 +403,6 @@ def plot_comparison(fixed_metrics, adaptive_metrics):
     
     time_axis = np.arange(len(fixed_metrics['waiting_times']))
     
-    # Chart 1: Waiting time
     ax = axes[0, 0]
     ax.plot(time_axis, fixed_metrics['waiting_times'], label='Fixed', alpha=0.7, linewidth=1)
     ax.plot(time_axis, adaptive_metrics['waiting_times'], label='Adaptive', alpha=0.7, linewidth=1)
@@ -457,8 +411,7 @@ def plot_comparison(fixed_metrics, adaptive_metrics):
     ax.set_title('Vehicle Waiting Time')
     ax.legend()
     ax.grid(True, alpha=0.3)
-    
-    # Chart 2: Queue length
+
     ax = axes[0, 1]
     ax.plot(time_axis, fixed_metrics['queue_lengths'], label='Fixed', alpha=0.7, linewidth=1)
     ax.plot(time_axis, adaptive_metrics['queue_lengths'], label='Adaptive', alpha=0.7, linewidth=1)
@@ -468,7 +421,7 @@ def plot_comparison(fixed_metrics, adaptive_metrics):
     ax.legend()
     ax.grid(True, alpha=0.3)
     
-    # Chart 3: CO2 emissions
+
     ax = axes[0, 2]
     ax.plot(time_axis, fixed_metrics['co2_emissions'], label='Fixed', alpha=0.7, linewidth=1)
     ax.plot(time_axis, adaptive_metrics['co2_emissions'], label='Adaptive', alpha=0.7, linewidth=1)
@@ -478,7 +431,6 @@ def plot_comparison(fixed_metrics, adaptive_metrics):
     ax.legend()
     ax.grid(True, alpha=0.3)
     
-    # Chart 4: Average speed
     ax = axes[1, 0]
     if fixed_metrics['avg_speed'] and adaptive_metrics['avg_speed']:
         ax.plot(time_axis[:len(fixed_metrics['avg_speed'])], 
@@ -493,7 +445,7 @@ def plot_comparison(fixed_metrics, adaptive_metrics):
     ax.legend()
     ax.grid(True, alpha=0.3)
     
-    # Chart 5: Waiting time histogram
+
     ax = axes[1, 1]
     ax.hist(fixed_metrics['waiting_times'], bins=50, alpha=0.6, label='Fixed', color='blue')
     ax.hist(adaptive_metrics['waiting_times'], bins=50, alpha=0.6, label='Adaptive', color='green')
@@ -503,7 +455,6 @@ def plot_comparison(fixed_metrics, adaptive_metrics):
     ax.legend()
     ax.grid(True, alpha=0.3)
     
-    # Chart 6: Metrics summary
     ax = axes[1, 2]
     metrics_names = ['Avg. Wait', 'Avg. Queue', 'Avg. CO2/100', 'Served/10']
     fixed_vals = [
@@ -535,16 +486,12 @@ def plot_comparison(fixed_metrics, adaptive_metrics):
     print("✅ Chart saved: traffic_light_comparison.png")
     plt.close()     
 
-# ============================================
-# MAIN FUNCTION
-# ============================================
 
 def main():
     print("\n" + "🚦"*30)
     print("FIXED VS ADAPTIVE TRAFFIC LIGHT COMPARISON")
     print("🚦"*30)
     
-    # Check configuration
     print("\n⚙️ Checking configuration...")
     print(f"   SUMO: {SUMO_BINARY}")
     print(f"   Config: {CONFIG_FILE}")
@@ -559,11 +506,10 @@ def main():
         print(f"\n❌ Configuration not found: {CONFIG_FILE}")
         return
     
-    duration = 1800  # 30 minutes (was 3600 - too long for initial test)
+    duration = 1800 
     print(f"\n⏱️ Simulation duration: {duration} seconds ({duration//60} minutes)")
     print("   💡 Tip: Increase to 3600 for more accurate results")
     
-    # Run both simulations
     fixed_metrics = run_fixed_traffic_light(duration)
     adaptive_metrics = run_adaptive_traffic_light(duration)
     
@@ -571,7 +517,6 @@ def main():
         print("\n❌ Failed to complete comparison")
         return
     
-    # Check if there is data
     if len(fixed_metrics['waiting_times']) == 0:
         print("\n❌ Failed to collect metrics!")
         print("   Possible reasons:")
@@ -579,10 +524,8 @@ def main():
         print("   2. Simulation too short")
         return
     
-    # Compare results
     compare_metrics(fixed_metrics, adaptive_metrics)
     
-    # Build charts
     plot_comparison(fixed_metrics, adaptive_metrics)
     
     print("\n" + "="*70)
