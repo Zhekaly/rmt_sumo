@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nodes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/nodes_file.xsd">
+    
+    <!-- Сетка 3×3 перекрёстков со светофорами -->
+    <!-- Координаты: расстояние между перекрёстками 400м -->
+    
+    <!-- Ряд 0 (верхний) -->
+    <node id="j_0_0" x="200" y="1000" type="traffic_light"/>
+    <node id="j_1_0" x="600" y="1000" type="traffic_light"/>
+    <node id="j_2_0" x="1000" y="1000" type="traffic_light"/>
+    
+    <!-- Ряд 1 (средний) -->
+    <node id="j_0_1" x="200" y="600" type="traffic_light"/>
+    <node id="j_1_1" x="600" y="600" type="traffic_light"/>
+    <node id="j_2_1" x="1000" y="600" type="traffic_light"/>
+    
+    <!-- Ряд 2 (нижний) -->
+    <node id="j_0_2" x="200" y="200" type="traffic_light"/>
+    <node id="j_1_2" x="600" y="200" type="traffic_light"/>
+    <node id="j_2_2" x="1000" y="200" type="traffic_light"/>
+    
+    <!-- Внешние узлы (точки входа/выхода) -->
+    <!-- Верхние входы -->
+    <node id="n_top_0" x="200" y="1300" type="priority"/>
+    <node id="n_top_1" x="600" y="1300" type="priority"/>
+    <node id="n_top_2" x="1000" y="1300" type="priority"/>
+    
+    <!-- Нижние входы -->
+    <node id="n_bot_0" x="200" y="-100" type="priority"/>
+    <node id="n_bot_1" x="600" y="-100" type="priority"/>
+    <node id="n_bot_2" x="1000" y="-100" type="priority"/>
+    
+    <!-- Левые входы -->
+    <node id="n_left_0" x="-100" y="1000" type="priority"/>
+    <node id="n_left_1" x="-100" y="600" type="priority"/>
+    <node id="n_left_2" x="-100" y="200" type="priority"/>
+    
+    <!-- Правые входы -->
+    <node id="n_right_0" x="1300" y="1000" type="priority"/>
+    <node id="n_right_1" x="1300" y="600" type="priority"/>
+    <node id="n_right_2" x="1300" y="200" type="priority"/>
+    
+</nodes>

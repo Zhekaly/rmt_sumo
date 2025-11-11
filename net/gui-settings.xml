@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<viewsettings>
+    <scheme name="real world">
+        <background backgroundColor="200,200,200" showGrid="1" gridXSize="100" gridYSize="100"/>
+        <edges laneEdgeMode="0" scaleMode="0" laneShowBorders="1" showLinkDecals="1" 
+               showLinkRules="1" showRails="1" hideConnectors="0" 
+               widthExaggeration="1.0" minSize="0.0" showDirection="0"/>
+        <vehicles vehicleMode="0" vehicleQuality="2" minVehicleSize="1.0" 
+                  vehicleExaggeration="1.0" showBlinker="1" 
+                  drawMinGap="0" showBTRange="0" showRouteIndex="0" 
+                  scaleLength="1.0" drawLaneChangePreference="0"/>
+        <persons personMode="0" personQuality="2" minPersonSize="1.0" 
+                 personExaggeration="1.0" showPedestrianNetwork="0"/>
+        <junctions drawLinkTLIndex="0" drawLinkJunctionIndex="0" 
+                   junctionMode="0" drawCrossingsAndWalkingAreas="1" 
+                   junctionSize="1.0" junctionName="0"/>
+        <additionals addMode="0" addSize="1.0" addName="0"/>
+        <pois poiSize="1.0" poiDetail="5"/>
+        <legend showSizeLegend="1"/>
+    </scheme>
+</viewsettings>

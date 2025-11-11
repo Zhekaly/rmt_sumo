@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
+    
+    <!-- Типы транспортных средств -->
+    <vType id="car" vClass="passenger" accel="2.6" decel="4.5" sigma="0.5" length="5" minGap="2.5" maxSpeed="50" color="1,0,0"/>
+    <vType id="bus" vClass="bus" accel="1.2" decel="4.0" sigma="0.3" length="12" minGap="3" maxSpeed="40" color="0,1,0"/>
+    <vType id="truck" vClass="truck" accel="1.0" decel="3.5" sigma="0.4" length="10" minGap="3" maxSpeed="35" color="0.5,0.5,0"/>
+    <vType id="emergency" vClass="emergency" accel="3.5" decel="5.5" sigma="0.3" length="6" minGap="2" maxSpeed="60" color="1,1,0"/>
+    
+    <!-- ОСНОВНЫЕ ПОТОКИ НА МАГИСТРАЛЯХ (высокая интенсивность) -->
+    
+    <!-- Горизонтальная магистраль (ряд 0) - Запад → Восток -->
+    <flow id="f_main_h0_we" type="car" begin="0" end="3600" probability="0.06" from="e_in_left_0" to="e_out_right_0" departLane="best"/>
+    <flow id="f_bus_h0_we" type="bus" begin="0" end="3600" probability="0.01" from="e_in_left_0" to="e_out_right_0" departLane="best"/>
+    <flow id="f_truck_h0_we" type="truck" begin="0" end="3600" probability="0.015" from="e_in_left_0" to="e_out_right_0" departLane="best"/>
+    
+    <!-- Горизонтальная магистраль (ряд 0) - Восток → Запад -->
+    <flow id="f_main_h0_ew" type="car" begin="0" end="3600" probability="0.06" from="e_in_right_0" to="e_out_left_0" departLane="best"/>
+    <flow id="f_bus_h0_ew" type="bus" begin="0" end="3600" probability="0.01" from="e_in_right_0" to="e_out_left_0" departLane="best"/>
+    <flow id="f_truck_h0_ew" type="truck" begin="0" end="3600" probability="0.015" from="e_in_right_0" to="e_out_left_0" departLane="best"/>
+    
+    <!-- Вертикальная магистраль (колонка 1) - Север → Юг -->
+    <flow id="f_main_v1_ns" type="car" begin="0" end="3600" probability="0.06" from="e_in_top_1" to="e_out_bot_1" departLane="best"/>
+    <flow id="f_bus_v1_ns" type="bus" begin="0" end="3600" probability="0.01" from="e_in_top_1" to="e_out_bot_1" departLane="best"/>
+    <flow id="f_truck_v1_ns" type="truck" begin="0" end="3600" probability="0.015" from="e_in_top_1" to="e_out_bot_1" departLane="best"/>
+    
+    <!-- Вертикальная магистраль (колонка 1) - Юг → Север -->
+    <flow id="f_main_v1_sn" type="car" begin="0" end="3600" probability="0.06" from="e_in_bot_1" to="e_out_top_1" departLane="best"/>
+    <flow id="f_bus_v1_sn" type="bus" begin="0" end="3600" probability="0.01" from="e_in_bot_1" to="e_out_top_1" departLane="best"/>
+    <flow id="f_truck_v1_sn" type="truck" begin="0" end="3600" probability="0.015" from="e_in_bot_1" to="e_out_top_1" departLane="best"/>
+    
+    <!-- ВТОРОСТЕПЕННЫЕ ДОРОГИ (средняя интенсивность) -->
+    
+    <!-- Горизонталь ряд 1 -->
+    <flow id="f_sec_h1_we" type="car" begin="0" end="3600" probability="0.04" from="e_in_left_1" to="e_out_right_1" departLane="best"/>
+    <flow id="f_sec_h1_ew" type="car" begin="0" end="3600" probability="0.04" from="e_in_right_1" to="e_out_left_1" departLane="best"/>
+    
+    <!-- Вертикаль колонка 0 -->
+    <flow id="f_sec_v0_ns" type="car" begin="0" end="3600" probability="0.04" from="e_in_top_0" to="e_out_bot_0" departLane="best"/>
+    <flow id="f_sec_v0_sn" type="car" begin="0" end="3600" probability="0.04" from="e_in_bot_0" to="e_out_top_0" departLane="best"/>
+    
+    <!-- ЛОКАЛЬНЫЕ ДОРОГИ (низкая интенсивность) -->
+    
+    <!-- Горизонталь ряд 2 -->
+    <flow id="f_local_h2_we" type="car" begin="0" end="3600" probability="0.02" from="e_in_left_2" to="e_out_right_2" departLane="best"/>
+    <flow id="f_local_h2_ew" type="car" begin="0" end="3600" probability="0.02" from="e_in_right_2" to="e_out_left_2" departLane="best"/>
+    
+    <!-- Вертикаль колонка 2 -->
+    <flow id="f_local_v2_ns" type="car" begin="0" end="3600" probability="0.02" from="e_in_top_2" to="e_out_bot_2" departLane="best"/>
+    <flow id="f_local_v2_sn" type="car" begin="0" end="3600" probability="0.02" from="e_in_bot_2" to="e_out_top_2" departLane="best"/>
+    
+    <!-- ПОВОРОТНЫЕ МАРШРУТЫ (через несколько перекрёстков) -->
+    
+    <!-- Из верхнего левого угла в нижний правый -->
+    <flow id="f_diag_1" type="car" begin="0" end="3600" probability="0.015" from="e_in_left_0" to="e_out_bot_2" departLane="best"/>
+    <flow id="f_diag_2" type="car" begin="0" end="3600" probability="0.015" from="e_in_top_0" to="e_out_right_2" departLane="best"/>
+    
+    <!-- Из верхнего правого угла в нижний левый -->
+    <flow id="f_diag_3" type="car" begin="0" end="3600" probability="0.015" from="e_in_right_0" to="e_out_bot_0" departLane="best"/>
+    <flow id="f_diag_4" type="car" begin="0" end="3600" probability="0.015" from="e_in_top_2" to="e_out_left_2" departLane="best"/>
+    
+    <!-- Маршруты через центр -->
+    <flow id="f_center_1" type="car" begin="0" end="3600" probability="0.025" from="e_in_left_1" to="e_out_top_1" departLane="best"/>
+    <flow id="f_center_2" type="car" begin="0" end="3600" probability="0.025" from="e_in_bot_1" to="e_out_right_1" departLane="best"/>
+    <flow id="f_center_3" type="car" begin="0" end="3600" probability="0.025" from="e_in_top_1" to="e_out_left_1" departLane="best"/>
+    <flow id="f_center_4" type="car" begin="0" end="3600" probability="0.025" from="e_in_right_1" to="e_out_bot_1" departLane="best"/>
+    
+    <!-- Спецслужбы (редко, но с приоритетом) -->
+    <flow id="f_emergency_1" type="emergency" begin="0" end="3600" probability="0.0025" from="e_in_left_0" to="e_out_right_0" departLane="best"/>
+    <flow id="f_emergency_2" type="emergency" begin="0" end="3600" probability="0.0025" from="e_in_top_1" to="e_out_bot_1" departLane="best"/>
+    
+    <!-- Короткие маршруты (1-2 перекрёстка) -->
+    <flow id="f_short_1" type="car" begin="0" end="3600" probability="0.03" from="e_in_left_0" to="e_out_top_0" departLane="best"/>
+    <flow id="f_short_2" type="car" begin="0" end="3600" probability="0.03" from="e_in_top_1" to="e_out_left_1" departLane="best"/>
+    <flow id="f_short_3" type="car" begin="0" end="3600" probability="0.03" from="e_in_right_1" to="e_out_bot_2" departLane="best"/>
+    <flow id="f_short_4" type="car" begin="0" end="3600" probability="0.03" from="e_in_bot_0" to="e_out_right_0" departLane="best"/>
+    
+</routes>

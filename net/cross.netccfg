@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/netconvertConfiguration.xsd">
+    <input>
+        <node-files value="cross.nod.xml"/>
+        <edge-files value="cross.edg.xml"/>
+    </input>
+    <output>
+        <output-file value="cross.net.xml"/>
+    </output>
+    <processing>
+        <no-turnarounds value="true"/>
+        <geometry.remove value="true"/>
+        <roundabouts.guess value="false"/>
+    </processing>
+    <tls>
+        <tls.guess value="false"/>
+        <tls.default-type value="static"/>
+    </tls>
+    <report>
+        <verbose value="true"/>
+    </report>
+</configuration>

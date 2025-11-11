@@ -1,0 +1,6 @@
+Metric,Fixed,Adaptive,Improvement
+Avg. Waiting Time (s),445.8,133.6,+70.0%
+Max. Waiting Time (s),2251.0,576.0,+74.4%
+Avg. Queue (vehicles),30.6,16.6,+45.6%
+Avg. CO2 (g/s),388164.2,356459.4,+8.2%
+Avg. Speed (km/h),31.8,36.1,+13.6%

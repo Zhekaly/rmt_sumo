@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<edges xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/edges_file.xsd">
+    
+    <!-- Горизонтальные дороги (Запад-Восток) -->
+    <!-- Ряд 0 - магистраль (3 полосы, скорость 60 км/ч = 16.67 м/с) -->
+    <edge id="e_h_0_0_to_1_0" from="j_0_0" to="j_1_0" numLanes="3" speed="16.67" priority="10"/>
+    <edge id="e_h_1_0_to_0_0" from="j_1_0" to="j_0_0" numLanes="3" speed="16.67" priority="10"/>
+    <edge id="e_h_1_0_to_2_0" from="j_1_0" to="j_2_0" numLanes="3" speed="16.67" priority="10"/>
+    <edge id="e_h_2_0_to_1_0" from="j_2_0" to="j_1_0" numLanes="3" speed="16.67" priority="10"/>
+    
+    <!-- Ряд 1 - второстепенная (2 полосы, скорость 50 км/ч = 13.89 м/с) -->
+    <edge id="e_h_0_1_to_1_1" from="j_0_1" to="j_1_1" numLanes="2" speed="13.89" priority="5"/>
+    <edge id="e_h_1_1_to_0_1" from="j_1_1" to="j_0_1" numLanes="2" speed="13.89" priority="5"/>
+    <edge id="e_h_1_1_to_2_1" from="j_1_1" to="j_2_1" numLanes="2" speed="13.89" priority="5"/>
+    <edge id="e_h_2_1_to_1_1" from="j_2_1" to="j_1_1" numLanes="2" speed="13.89" priority="5"/>
+    
+    <!-- Ряд 2 - локальная (1 полоса, скорость 40 км/ч = 11.11 м/с) -->
+    <edge id="e_h_0_2_to_1_2" from="j_0_2" to="j_1_2" numLanes="1" speed="11.11" priority="2"/>
+    <edge id="e_h_1_2_to_0_2" from="j_1_2" to="j_0_2" numLanes="1" speed="11.11" priority="2"/>
+    <edge id="e_h_1_2_to_2_2" from="j_1_2" to="j_2_2" numLanes="1" speed="11.11" priority="2"/>
+    <edge id="e_h_2_2_to_1_2" from="j_2_2" to="j_1_2" numLanes="1" speed="11.11" priority="2"/>
+    
+    <!-- Вертикальные дороги (Север-Юг) -->
+    <!-- Колонка 0 - второстепенная (2 полосы) -->
+    <edge id="e_v_0_0_to_0_1" from="j_0_0" to="j_0_1" numLanes="2" speed="13.89" priority="5"/>
+    <edge id="e_v_0_1_to_0_0" from="j_0_1" to="j_0_0" numLanes="2" speed="13.89" priority="5"/>
+    <edge id="e_v_0_1_to_0_2" from="j_0_1" to="j_0_2" numLanes="2" speed="13.89" priority="5"/>
+    <edge id="e_v_0_2_to_0_1" from="j_0_2" to="j_0_1" numLanes="2" speed="13.89" priority="5"/>
+    
+    <!-- Колонка 1 - магистраль (3 полосы) -->
+    <edge id="e_v_1_0_to_1_1" from="j_1_0" to="j_1_1" numLanes="3" speed="16.67" priority="10"/>
+    <edge id="e_v_1_1_to_1_0" from="j_1_1" to="j_1_0" numLanes="3" speed="16.67" priority="10"/>
+    <edge id="e_v_1_1_to_1_2" from="j_1_1" to="j_1_2" numLanes="3" speed="16.67" priority="10"/>
+    <edge id="e_v_1_2_to_1_1" from="j_1_2" to="j_1_1" numLanes="3" speed="16.67" priority="10"/>
+    
+    <!-- Колонка 2 - локальная (1 полоса) -->
+    <edge id="e_v_2_0_to_2_1" from="j_2_0" to="j_2_1" numLanes="1" speed="11.11" priority="2"/>
+    <edge id="e_v_2_1_to_2_0" from="j_2_1" to="j_2_0" numLanes="1" speed="11.11" priority="2"/>
+    <edge id="e_v_2_1_to_2_2" from="j_2_1" to="j_2_2" numLanes="1" speed="11.11" priority="2"/>
+    <edge id="e_v_2_2_to_2_1" from="j_2_2" to="j_2_1" numLanes="1" speed="11.11" priority="2"/>
+    
+    <!-- Внешние подключения -->
+    <!-- Верхние входы/выходы -->
+    <edge id="e_in_top_0" from="n_top_0" to="j_0_0" numLanes="2" speed="13.89" priority="5"/>
+    <edge id="e_out_top_0" from="j_0_0" to="n_top_0" numLanes="2" speed="13.89" priority="5"/>
+    <edge id="e_in_top_1" from="n_top_1" to="j_1_0" numLanes="3" speed="16.67" priority="10"/>
+    <edge id="e_out_top_1" from="j_1_0" to="n_top_1" numLanes="3" speed="16.67" priority="10"/>
+    <edge id="e_in_top_2" from="n_top_2" to="j_2_0" numLanes="1" speed="11.11" priority="2"/>
+    <edge id="e_out_top_2" from="j_2_0" to="n_top_2" numLanes="1" speed="11.11" priority="2"/>
+    
+    <!-- Нижние входы/выходы -->
+    <edge id="e_in_bot_0" from="n_bot_0" to="j_0_2" numLanes="2" speed="13.89" priority="5"/>
+    <edge id="e_out_bot_0" from="j_0_2" to="n_bot_0" numLanes="2" speed="13.89" priority="5"/>
+    <edge id="e_in_bot_1" from="n_bot_1" to="j_1_2" numLanes="3" speed="16.67" priority="10"/>
+    <edge id="e_out_bot_1" from="j_1_2" to="n_bot_1" numLanes="3" speed="16.67" priority="10"/>
+    <edge id="e_in_bot_2" from="n_bot_2" to="j_2_2" numLanes="1" speed="11.11" priority="2"/>
+    <edge id="e_out_bot_2" from="j_2_2" to="n_bot_2" numLanes="1" speed="11.11" priority="2"/>
+    
+    <!-- Левые входы/выходы -->
+    <edge id="e_in_left_0" from="n_left_0" to="j_0_0" numLanes="3" speed="16.67" priority="10"/>
+    <edge id="e_out_left_0" from="j_0_0" to="n_left_0" numLanes="3" speed="16.67" priority="10"/>
+    <edge id="e_in_left_1" from="n_left_1" to="j_0_1" numLanes="2" speed="13.89" priority="5"/>
+    <edge id="e_out_left_1" from="j_0_1" to="n_left_1" numLanes="2" speed="13.89" priority="5"/>
+    <edge id="e_in_left_2" from="n_left_2" to="j_0_2" numLanes="1" speed="11.11" priority="2"/>
+    <edge id="e_out_left_2" from="j_0_2" to="n_left_2" numLanes="1" speed="11.11" priority="2"/>
+    
+    <!-- Правые входы/выходы -->
+    <edge id="e_in_right_0" from="n_right_0" to="j_2_0" numLanes="3" speed="16.67" priority="10"/>
+    <edge id="e_out_right_0" from="j_2_0" to="n_right_0" numLanes="3" speed="16.67" priority="10"/>
+    <edge id="e_in_right_1" from="n_right_1" to="j_2_1" numLanes="2" speed="13.89" priority="5"/>
+    <edge id="e_out_right_1" from="j_2_1" to="n_right_1" numLanes="2" speed="13.89" priority="5"/>
+    <edge id="e_in_right_2" from="n_right_2" to="j_2_2" numLanes="2" speed="11.11" priority="2"/>
+    <edge id="e_out_right_2" from="j_2_2" to="n_right_2" numLanes="2" speed="11.11" priority="2"/>
+    
+</edges>
