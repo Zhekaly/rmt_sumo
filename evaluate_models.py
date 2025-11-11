@@ -9,22 +9,22 @@ import matplotlib.pyplot as plt
 import warnings
 warnings.filterwarnings('ignore')
 
-print("📂 Загрузка данных...")
+print("📂 Loading data...")
 df = pd.read_csv("traffic_data.csv")
 
-print(f"✓ Загружено {len(df)} записей")
-print(f"✓ Колонки: {df.columns.tolist()}")
-print(f"\n📊 Статистика данных:")
+print(f"✓ Loaded {len(df)} records")
+print(f"✓ Columns: {df.columns.tolist()}")
+print(f"\n📊 Data statistics:")
 print(df.describe())
 
 if df.isnull().sum().sum() > 0:
-    print("\n⚠️  Обнаружены пропуски:")
+    print("\n⚠️  Missing values detected:")
     print(df.isnull().sum())
     df = df.dropna()
-    print(f"✓ После удаления: {len(df)} записей")
+    print(f"✓ After removal: {len(df)} records")
 
 
-print("\n🔧 Подготовка признаков...")
+print("\n🔧 Feature engineering...")
 
 df_agg = df.groupby('step').agg({
     'veh_count': 'mean',
@@ -41,8 +41,8 @@ X = df_agg[["veh_count", "CO2", "veh_waiting_ratio", "CO2_per_vehicle", "traffic
 
 def calculate_optimal_green_time(row):
     """
-    Эвристика для оптимального времени зелёного света
-    В реальности эти значения должны быть получены из экспериментов
+    Heuristic for optimal green light duration
+    In reality, these values should be obtained from experiments
     """
     veh = row['veh_count']
     co2 = row['CO2']
@@ -68,21 +68,21 @@ def calculate_optimal_green_time(row):
 
 y = df_agg.apply(calculate_optimal_green_time, axis=1)
 
-print(f"Признаки: {X.columns.tolist()}")
-print(f"Целевая переменная: оптимальное время зелёного (5-90 сек)")
-print(f"Среднее: {y.mean():.1f}s, Медиана: {y.median():.1f}s")
+print(f"Features: {X.columns.tolist()}")
+print(f"Target variable: optimal green time (5-90 sec)")
+print(f"Mean: {y.mean():.1f}s, Median: {y.median():.1f}s")
 
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42, shuffle=True
 )
 
-print(f"\n📊 Разделение:")
+print(f"\n📊 Data split:")
 print(f"   Train: {len(X_train)} ({len(X_train)/len(X)*100:.1f}%)")
 print(f"   Test:  {len(X_test)} ({len(X_test)/len(X)*100:.1f}%)")
 
-print("\n🤖 Обучение моделей...")
+print("\n🤖 Training models...")
 
-print("   → CatBoost (с early stopping)...")
+print("   → CatBoost (with early stopping)...")
 X_train_cb, X_val_cb, y_train_cb, y_val_cb = train_test_split(
     X_train, y_train, test_size=0.2, random_state=42
 )
@@ -102,7 +102,7 @@ cat_model.fit(
     verbose=False
 )
 
-print("   → Neural Network (с early stopping)...")
+print("   → Neural Network (with early stopping)...")
 scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train)
 X_test_scaled = scaler.transform(X_test)
@@ -136,11 +136,11 @@ history = nn_model.fit(
     verbose=0
 )
 
-print("✅ Обучение завершено!")
-print(f"   CatBoost: {cat_model.tree_count_} деревьев")
-print(f"   NN: остановка на эпохе {len(history.history['loss'])}")
+print("✅ Training completed!")
+print(f"   CatBoost: {cat_model.tree_count_} trees")
+print(f"   NN: stopped at epoch {len(history.history['loss'])}")
 
-print("\n🔮 Получение предсказаний...")
+print("\n🔮 Generating predictions...")
 
 y_pred_cat = cat_model.predict(X_test)
 y_pred_nn = nn_model.predict(X_test_scaled, verbose=0).flatten()
@@ -151,7 +151,7 @@ y_pred_nn = np.clip(y_pred_nn, 5, 90)
 y_pred_ensemble = np.clip(y_pred_ensemble, 5, 90)
 
 print("\n" + "="*70)
-print("📈 МЕТРИКИ КАЧЕСТВА")
+print("📈 PERFORMANCE METRICS")
 print("="*70)
 
 models = {
@@ -174,12 +174,12 @@ for model_name, y_pred in models.items():
     within_5s = np.mean(np.abs(y_test - y_pred) < 5) * 100
     within_10s = np.mean(np.abs(y_test - y_pred) < 10) * 100
     
-    print(f"   MAE:           {mae:.2f}s  (средняя ошибка)")
-    print(f"   RMSE:          {rmse:.2f}s  (штраф за большие ошибки)")
-    print(f"   R²:            {r2:.4f}  (качество объяснения: {r2*100:.1f}%)")
+    print(f"   MAE:           {mae:.2f}s  (mean absolute error)")
+    print(f"   RMSE:          {rmse:.2f}s  (penalty for large errors)")
+    print(f"   R²:            {r2:.4f}  (explained variance: {r2*100:.1f}%)")
     print(f"   MAPE:          {mape:.2f}%")
-    print(f"   Точность ±5s:  {within_5s:.1f}%")
-    print(f"   Точность ±10s: {within_10s:.1f}%")
+    print(f"   Accuracy ±5s:  {within_5s:.1f}%")
+    print(f"   Accuracy ±10s: {within_10s:.1f}%")
     
     if mae < best_mae:
         best_mae = mae
@@ -187,7 +187,7 @@ for model_name, y_pred in models.items():
 
 
 print("\n" + "="*70)
-print("🔍 ВАЖНОСТЬ ПРИЗНАКОВ (CatBoost)")
+print("🔍 FEATURE IMPORTANCE (CatBoost)")
 print("="*70)
 
 feature_importance = pd.DataFrame({
@@ -198,32 +198,32 @@ feature_importance = pd.DataFrame({
 for _, row in feature_importance.iterrows():
     print(f"   {row['feature']:20s}: {row['importance']:6.2f}")
 
-print("\n📊 Создание графиков...")
+print("\n📊 Creating plots...")
 
 fig, axes = plt.subplots(2, 3, figsize=(18, 10))
-fig.suptitle('Оценка качества моделей светофора', fontsize=16, fontweight='bold')
+fig.suptitle('Traffic Light Model Performance Evaluation', fontsize=16, fontweight='bold')
 
 ax = axes[0, 0]
 ax.scatter(y_test, y_pred_cat, alpha=0.6, s=30, edgecolors='k', linewidths=0.5)
 ax.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'r--', lw=2)
-ax.set_xlabel('Реальное время (сек)', fontsize=10)
-ax.set_ylabel('Предсказанное время (сек)', fontsize=10)
+ax.set_xlabel('Actual Time (sec)', fontsize=10)
+ax.set_ylabel('Predicted Time (sec)', fontsize=10)
 ax.set_title(f'CatBoost (MAE={mean_absolute_error(y_test, y_pred_cat):.2f}s)', fontsize=11)
 ax.grid(True, alpha=0.3)
 
 ax = axes[0, 1]
 ax.scatter(y_test, y_pred_nn, alpha=0.6, s=30, color='green', edgecolors='k', linewidths=0.5)
 ax.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'r--', lw=2)
-ax.set_xlabel('Реальное время (сек)', fontsize=10)
-ax.set_ylabel('Предсказанное время (сек)', fontsize=10)
+ax.set_xlabel('Actual Time (sec)', fontsize=10)
+ax.set_ylabel('Predicted Time (sec)', fontsize=10)
 ax.set_title(f'Neural Network (MAE={mean_absolute_error(y_test, y_pred_nn):.2f}s)', fontsize=11)
 ax.grid(True, alpha=0.3)
 
 ax = axes[0, 2]
 ax.scatter(y_test, y_pred_ensemble, alpha=0.6, s=30, color='purple', edgecolors='k', linewidths=0.5)
 ax.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'r--', lw=2)
-ax.set_xlabel('Реальное время (сек)', fontsize=10)
-ax.set_ylabel('Предсказанное время (сек)', fontsize=10)
+ax.set_xlabel('Actual Time (sec)', fontsize=10)
+ax.set_ylabel('Predicted Time (sec)', fontsize=10)
 ax.set_title(f'Ensemble (MAE={mean_absolute_error(y_test, y_pred_ensemble):.2f}s)', fontsize=11)
 ax.grid(True, alpha=0.3)
 
@@ -233,17 +233,17 @@ errors_nn = y_test.values - y_pred_nn
 ax.hist(errors_cat, bins=30, alpha=0.6, label='CatBoost', color='blue')
 ax.hist(errors_nn, bins=30, alpha=0.6, label='Neural Net', color='green')
 ax.axvline(x=0, color='red', linestyle='--', linewidth=2)
-ax.set_xlabel('Ошибка (сек)', fontsize=10)
-ax.set_ylabel('Частота', fontsize=10)
-ax.set_title('Распределение ошибок', fontsize=11)
+ax.set_xlabel('Error (sec)', fontsize=10)
+ax.set_ylabel('Frequency', fontsize=10)
+ax.set_title('Error Distribution', fontsize=11)
 ax.legend()
 ax.grid(True, alpha=0.3)
 
 ax = axes[1, 1]
 feature_importance.plot(kind='barh', x='feature', y='importance', ax=ax, legend=False, color='teal')
-ax.set_xlabel('Важность', fontsize=10)
+ax.set_xlabel('Importance', fontsize=10)
 ax.set_ylabel('')
-ax.set_title('Важность признаков (CatBoost)', fontsize=11)
+ax.set_title('Feature Importance (CatBoost)', fontsize=11)
 ax.grid(True, alpha=0.3, axis='x')
 
 ax = axes[1, 2]
@@ -253,12 +253,12 @@ r2_values = [r2_score(y_test, p) * 10 for p in [y_pred_cat, y_pred_nn, y_pred_en
 x = np.arange(3)
 width = 0.35
 
-bars1 = ax.bar(x - width/2, mae_values, width, label='MAE (сек)', color='skyblue')
+bars1 = ax.bar(x - width/2, mae_values, width, label='MAE (sec)', color='skyblue')
 bars2 = ax.bar(x + width/2, r2_values, width, label='R² × 10', color='orange')
 
-ax.set_xlabel('Модели', fontsize=10)
-ax.set_ylabel('Значение', fontsize=10)
-ax.set_title('Сравнение моделей', fontsize=11)
+ax.set_xlabel('Models', fontsize=10)
+ax.set_ylabel('Value', fontsize=10)
+ax.set_title('Model Comparison', fontsize=11)
 ax.set_xticks(x)
 ax.set_xticklabels(['CatBoost', 'NN', 'Ensemble'])
 ax.legend()
@@ -266,18 +266,18 @@ ax.grid(True, alpha=0.3, axis='y')
 
 plt.tight_layout()
 plt.savefig('model_evaluation_fixed.png', dpi=150, bbox_inches='tight')
-print("✅ График сохранён: model_evaluation_fixed.png")
+print("✅ Plot saved: model_evaluation_fixed.png")
 
 
 print("\n" + "="*70)
-print("🚦 ТЕСТ НА РЕАЛЬНЫХ СЦЕНАРИЯХ")
+print("🚦 REAL-WORLD SCENARIO TESTING")
 print("="*70)
 
 test_scenarios = [
-    {"name": "Ночь (малый трафик)", "veh_count": 2, "CO2": 100},
-    {"name": "Утро (средний трафик)", "veh_count": 8, "CO2": 500},
-    {"name": "Пробка", "veh_count": 15, "CO2": 1200},
-    {"name": "Час пик", "veh_count": 20, "CO2": 1800}
+    {"name": "Night (low traffic)", "veh_count": 2, "CO2": 100},
+    {"name": "Morning (medium traffic)", "veh_count": 8, "CO2": 500},
+    {"name": "Congestion", "veh_count": 15, "CO2": 1200},
+    {"name": "Rush hour", "veh_count": 20, "CO2": 1800}
 ]
 
 for scenario in test_scenarios:
@@ -300,19 +300,19 @@ for scenario in test_scenarios:
     pred_ensemble = (pred_cat + pred_nn) / 2
     
     print(f"\n📍 {scenario['name']}:")
-    print(f"   Машины: {scenario['veh_count']}, CO2: {scenario['CO2']}g")
+    print(f"   Vehicles: {scenario['veh_count']}, CO2: {scenario['CO2']}g")
     print(f"   → CatBoost:    {pred_cat:.1f}s")
     print(f"   → Neural Net:  {pred_nn:.1f}s")
-    print(f"   → Ансамбль:    {pred_ensemble:.1f}s ⭐")
+    print(f"   → Ensemble:    {pred_ensemble:.1f}s ⭐")
 
 
 print("\n" + "="*70)
-print("🎯 ИТОГОВЫЙ ОТЧЁТ")
+print("🎯 FINAL REPORT")
 print("="*70)
-print(f"✅ Лучшая модель: {best_model} (MAE = {best_mae:.2f}s)")
-print(f"📊 Общее качество: {'Хорошее' if best_mae < 5 else 'Требует улучшения'}")
-print(f"⚠️  ВАЖНО: Целевая переменная создана эвристически!")
-print(f"   Для реального применения нужны данные из экспериментов с SUMO.")
+print(f"✅ Best model: {best_model} (MAE = {best_mae:.2f}s)")
+print(f"📊 Overall quality: {'Good' if best_mae < 5 else 'Needs improvement'}")
+print(f"⚠️  IMPORTANT: Target variable was created heuristically!")
+print(f"   For real-world deployment, experimental data from SUMO is required.")
 
 results_df = pd.DataFrame({
     'y_test': y_test.values,
@@ -324,5 +324,5 @@ results_df = pd.DataFrame({
     'abs_error_ensemble': np.abs(y_test.values - y_pred_ensemble)
 })
 results_df.to_csv('model_predictions_fixed.csv', index=False)
-print("\n✅ Результаты сохранены: model_predictions_fixed.csv")
+print("\n✅ Results saved: model_predictions_fixed.csv")
 print("="*70)
