@@ -236,29 +236,6 @@ CONFIG_FILE = r"C:\sumodemo\net\cross.sumocfg"
 
 ---
 
-## 📈 Experimental Results
-
-### System Comparison (average values)
-
-| Metric | Fixed Traffic Lights | Adaptive Traffic Lights | Improvement |
-|--------|---------------------|------------------------|-------------|
-| Average Waiting Time | 45.2 sec | 34.8 sec | **-23%** ✅ |
-| Max Waiting Time | 180.5 sec | 142.1 sec | **-21%** ✅ |
-| Average Queue Length | 8.7 vehicles | 6.3 vehicles | **-28%** ✅ |
-| CO₂ Emissions | 1250 g/sec | 1085 g/sec | **-13%** ✅ |
-| Average Speed | 32.4 km/h | 36.8 km/h | **+14%** ✅ |
-| Vehicles Served | 3420 | 3680 | **+7.6%** ✅ |
-
-### Model Performance
-
-| Model | MAE (sec) | RMSE (sec) | R² | Accuracy ±10s |
-|-------|-----------|------------|-----|---------------|
-| CatBoost | 3.42 | 5.18 | 0.89 | 87.3% |
-| Neural Network | 3.67 | 5.45 | 0.87 | 85.1% |
-| **Ensemble** | **3.21** | **4.95** | **0.91** | **89.2%** ✅ |
-
----
-
 ##  Project Structure
 
 ```
@@ -456,3 +433,4 @@ This project is licensed under the MIT License. See `LICENSE` file for details.
 - SUMO Development Team for excellent simulator
 - ML Community for open-source libraries
 - All project contributors
+
